@@ -4,7 +4,6 @@ import numpy as np
 import sklearn
 from sklearn import metrics
 from sklearn.model_selection import GridSearchCV
-from utils import auc
 
 from sklearn.preprocessing import OneHotEncoder
 
@@ -12,12 +11,10 @@ data = pd.read_csv('TAMU_FINAL_DATASET_2018.csv')
 y_data = data['AMI_FLAG']
 X_data = data.drop(['AMI_FLAG'],axis=1)
 
-
 rows = X_data.shape[0]
 columns = X_data.shape[1]
 
 # print(data.dtypes)
-feature_num = data.shape[1]
 cat_features_index = []
 for (i,d) in enumerate(X_data.dtypes):
 	if d == 'object':
@@ -64,9 +61,19 @@ params = {'depth': [4, 7, 10],
          'iterations': [300]}
 
 print('start catboost')
-cb = cb.CatBoostClassifier()
-cb_model = GridSearchCV(cb, params, scoring="roc_auc", cv = 3)
+clf = cb.CatBoostClassifier()
+cb_model = GridSearchCV(clf, params, scoring="roc_auc", cv = 3)
 cb_model.fit(enc_X_train, y_train)
-print("auc of clf: ", auc(cb, enc_X_train, enc_X_test))
+
+print('save model')
+cb.save_model(cb_model, './catboost_one_hot.bin')
+
+#hlz please check here 
+print('evaluating')
+auc_train = metrics.roc_auc_score(y_train,m.predict_proba(X_train)[:,1])
+auc_test = metrics.roc_auc_score(y_test,m.predict_proba(X_test)[:,1])
+
+print(auc_train)
+print(auc_test)
 
 
