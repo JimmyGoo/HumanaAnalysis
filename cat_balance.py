@@ -21,7 +21,6 @@ from matplotlib import pyplot as plt
 
 data = pd.read_csv('HUMANA_Data_cleaned.csv')
 y_data = data['AMI_FLAG']
-print(y_data)
 
 positive_X = data[data['AMI_FLAG'] == 1]
 positive_y = positive_X['AMI_FLAG']
@@ -33,7 +32,7 @@ negative_X = negative_X.drop(['AMI_FLAG'],axis=1)
 positive_X.fillna(-999,inplace = True)
 negative_X.fillna(-999,inplace = True)
 
-ratio = 0.7
+ratio = 0.85
 #X_train,X_test,y_train,y_test=train_test_split(xData,yData,train_size=ratio)
 positive_X_train,positive_X_test,positive_y_train,positive_y_test=train_test_split(positive_X,positive_y,train_size=ratio)
 negative_X_train,negative_X_test,negative_y_train,negative_y_test=train_test_split(negative_X,negative_y,train_size=ratio)
@@ -58,17 +57,21 @@ print('negative test num:', negative_test_len)
 
 X_test = pd.concat([negative_X_test, positive_X_test])
 y_test = pd.concat([negative_y_test, positive_y_test])
-print('merged test')
 
 models = []
-
 model_nums = int(negative_train_len / positive_train_len) 
+
+use_best_model=False
 train = True
-iterations = 10
-depth = 5
-learning_rate=0.5
-loss_function='RMSE'
-path = './iter_' + str(iterations) + '_depth_' + str(depth) + '_lr_' + str(learning_rate) + '_' + loss_function + '/'
+iterations = 30
+depth = 8
+learning_rate=None
+loss_function='CrossEntropy'
+
+if not use_best_model:
+	path = './iter_' + str(iterations) + '_depth_' + str(depth) + '_lr_' + str(learning_rate) + '_' + loss_function + '/'
+else:
+	path = './best_model/'
 
 if train:
 	if os.path.exists(path):
@@ -91,8 +94,11 @@ if train:
 
 		categorical_features_indices=np.where(X_train.dtypes!=np.float)[0]
 		model=catboost.CatBoostClassifier(iterations=iterations, depth=depth, learning_rate=learning_rate, loss_function=loss_function,
-                              logging_level='Verbose')
-		model.fit(X_train, y_train,cat_features=categorical_features_indices)
+                              logging_level='Verbose', use_best_model=use_best_model)
+		if use_best_model:
+			model.fit(X_train, y_train,cat_features=categorical_features_indices,eval_set=(X_test, y_test))
+		else:
+			model.fit(X_train, y_train,cat_features=categorical_features_indices)
 		models.append(model)
 		joblib.dump(model, path+'model_{}.joblib'.format(i+1)) 
 
@@ -131,3 +137,4 @@ f = open(path+'acc.txt','w')
 f.write(str(acc))
 f.close()
 print('1 num: ', np.sum(res))
+print('path:', path)
