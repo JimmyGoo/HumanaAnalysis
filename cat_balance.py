@@ -63,11 +63,11 @@ print('merged test')
 models = []
 
 model_nums = int(negative_train_len / positive_train_len) 
-train = False
+train = True
 iterations = 10
 depth = 5
 learning_rate=0.5
-loss_function='CrossEntropy'
+loss_function='RMSE'
 path = './iter_' + str(iterations) + '_depth_' + str(depth) + '_lr_' + str(learning_rate) + '_' + loss_function + '/'
 
 if train:
@@ -90,7 +90,7 @@ if train:
 		print('train model {}, X_len {}, y_len {}'.format(i+1, len(X_train), len(y_train)))
 
 		categorical_features_indices=np.where(X_train.dtypes!=np.float)[0]
-		model=catboost.CatBoostClassifier(iterations=10, depth=5, learning_rate=0.5, loss_function='CrossEntropy',
+		model=catboost.CatBoostClassifier(iterations=iterations, depth=depth, learning_rate=learning_rate, loss_function=loss_function,
                               logging_level='Verbose')
 		model.fit(X_train, y_train,cat_features=categorical_features_indices)
 		models.append(model)
