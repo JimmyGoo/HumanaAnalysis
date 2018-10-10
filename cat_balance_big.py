@@ -18,7 +18,7 @@ import time
 import os
 import shutil
 import matplotlib
-matplotlib.use("Agg")
+matplotlib.use("tkagg")
 from matplotlib import pyplot as plt 
 
 def train(train=False,iterations=10,depth=10,learning_rate=None,loss_function='CrossEntropy',l2_leaf_reg=9):
@@ -136,15 +136,21 @@ def train(train=False,iterations=10,depth=10,learning_rate=None,loss_function='C
 	print('path:', path)
 
 if __name__ == '__main__':
-	
-	iterations = [30,50]
-	depths = 10
-	learning_rates=[0.15,0.3,0.45]
-	loss_functions=['Logloss','CrossEntropy']
-	l2_leaf_reg=[1,4,9]
+    
+ #    iterations = [10,20,30,40,50] #best 10
+	# depths = [6,7,8,9,10] # best 10
+	# learning_rates=[None,0.1,0.2,0.3,0.4,0.5]
+	# loss_functions=['Logloss','CrossEntropy']
+	# l2_leaf_reg=9
+
+	iterations = [50]
+	depths = [10] # best 10
+	learning_rates=[0.15]
+	loss_functions=['CrossEntropy']
+	l2_leaf_reg=9
 
 	for i in iterations:
-		for llr in l2_leaf_reg:
+		for d in depths:
 			for lr in learning_rates:
 				for lf in loss_functions:
-					train(train=True,iterations=i,depth=depths,learning_rate=lr,loss_function=lf,l2_leaf_reg=llr)
+					train(train=True,iterations=i,depth=d,learning_rate=lr,loss_function=lf,l2_leaf_reg=9)
